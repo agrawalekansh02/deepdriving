@@ -5,17 +5,21 @@ from torchvision import transforms
 import numpy as np
 
 class CamVidDataset(Dataset):
-    def __init__(self, shape, IMAGE_PATH, MASK_PATH, label_dict, ):
-        self.images = glob.glob(IMAGE_PATH).sort()
-        self.labels = glob.glob(MASK_PATH).sort()
+    def __init__(self, shape, IMAGE_PATH, MASK_PATH, label_dict):
+        self.images = glob.glob(IMAGE_PATH)
+        self.labels = glob.glob(MASK_PATH)
         self.label_dict = label_dict
         self.img_transform = transforms.Compose([
             transforms.ToPILImage(),
             transforms.Resize(shape),
-            transforms.ToTensor()])
+            transforms.ToTensor()
+        ])
         self.mask_transform = transforms.Compose([
             transforms.ToPILImage(),
-            transforms.Resize(shape)])
+            transforms.Resize(shape)
+        ])
+        self.images.sort()
+        self.labels.sort()
 
     def __len__(self):
         return len(self.images)
@@ -30,10 +34,10 @@ class CamVidDataset(Dataset):
         mask = np.array(mask)
         mask = self.adjust_mask(mask, self.label_dict)
         mask = torch.tensor(mask)
-        mask = torch.squeeze(mask)
+        mask = torch.squeeze(mask, dim=0)
         return img, mask
 
-    def adjust_mask(self, mask,label_dict):
+    def adjust_mask(self, mask, label_dict):
         segmentation_map_list = []
         for x,color in enumerate(label_dict.values()):
             segmentation_map = (mask==color).all(axis=-1)
@@ -43,7 +47,7 @@ class CamVidDataset(Dataset):
             
         return np.amax(np.stack(segmentation_map_list,axis=-1),axis=-1)
 
-    def convert_n_channels_2_rgb(self, image,label_dict):
+    def convert_n_channels_2_rgb(self, image, label_dict):
         image = np.amax(image,axis=-1)
         r = np.zeros_like(image).astype(np.uint8)
         g = np.zeros_like(image).astype(np.uint8)

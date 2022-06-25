@@ -67,8 +67,7 @@ class UNet(nn.Module):
         self.up3 = Up(256, 128 // 2)
         self.up4 = Up(128, 64)
         self.o = nn.Sequential(
-            nn.Conv2d(64, self.n_classes, kernel_size=1),
-            nn.Sigmoid()
+            nn.Conv2d(64, self.n_classes, kernel_size=1)
         )
 
     def forward(self, x):
