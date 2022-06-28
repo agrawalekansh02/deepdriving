@@ -61,7 +61,7 @@ class VAE(nn.Module):
         # return x
         mu, logvar = self.mu(x), self.var(x)
         p, q, z = self.run_sample(mu, logvar)
-        xhat = F.pad(self.decode(z), (5, 3), "constant", 0)
+        xhat = F.pad(self.decode(z), (2, 1, 3, 2), "constant", 0)
         return xhat, z, p, q
     
 def loss_fn(y, x_hat, p, q):
